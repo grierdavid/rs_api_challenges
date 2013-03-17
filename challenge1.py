@@ -29,7 +29,7 @@ Cent = [img for img in cs.images.list()
 flavor_512 = [flavor for flavor in cs.flavors.list()
                 if flavor.ram == 512][0]
 
-for i in range(1, 2):
+for i in range(1, 4):
     server_name='web' + str(i)
     server = cs.servers.create(server_name, Cent.id, flavor_512.id)
     print "Name:", server.name
