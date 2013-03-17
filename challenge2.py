@@ -24,20 +24,47 @@ pyrax.set_credential_file(creds_file)
 cs = pyrax.cloudservers
 imgs = cs.images.list()
 
-Cent = [img for img in cs.images.list()
-                if "CentOS 6.3" in img.name][0]
-flavor_512 = [flavor for flavor in cs.flavors.list()
-                if flavor.ram == 512][0]
+servername = 'mysavvy'
+nextServer = 'mysavvy1'
+imgname = 'mysavvy-img8'
+size = 512
 
-for i in range(1, 4):
-    server_name='web' + str(i)
-    server = cs.servers.create(server_name, Cent.id, flavor_512.id)
-    print "Name:", server.name
-    print "ID:", server.id
-    print "Status:", server.status
-    print "Admin Password:", server.adminPass
-    print "Waiting for Network config.."
-    while not cs.servers.get(server.id).networks:
-      time.sleep(1)
-    print "Networks:", cs.servers.get(server.id).networks['public']
+def get_flavor(self, size=512):
+  flavId = [flavor for flavor in cs.flavors.list()
+                  if flavor.ram == 512][0]
+  return flavId 
+
+def get_server_id(name):
+  sid = [s.id for s in cs.servers.list()
+         if name == s.name]
+  return sid[0]
+
+sid = get_server_id(servername)
+
+imgId = cs.servers.create_image(sid, imgname)
+
+while "ACTIVE" not in cs.images.get(imgId).status:
+  time.sleep(1)
+
+print cs.images.get(imgId).status
+
+flav = get_flavor(size)
+
+server = cs.servers.create(nextServer, imgId, flav.id)
+
+print "Name:", server.name
+print "ID:", server.id
+print "Status:", server.status
+print "Admin Password:", server.adminPass
+print "Waiting for Network config.."
+while not cs.servers.get(server.id).networks:
+  time.sleep(1)
+print "Networks:", cs.servers.get(server.id).networks['public']
+
+#def get_img_id(self):
+#  imgid = [i.id for i in cs.images.list()
+#         if imgname == i.name] 
+#  return imgid[0]
+
+#print get_img_id(imgname)
 
