@@ -61,10 +61,10 @@ while not cs.servers.get(server.id).networks:
   time.sleep(1)
 print "Networks:", cs.servers.get(server.id).networks['public']
 
-#def get_img_id(self):
-#  imgid = [i.id for i in cs.images.list()
-#         if imgname == i.name] 
-#  return imgid[0]
 
-#print get_img_id(imgname)
+
+
+
+
+
 
