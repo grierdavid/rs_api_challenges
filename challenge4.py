@@ -17,17 +17,35 @@
 
 import os
 import sys
-
 import pyrax
 import argparse
+from IPy import IP
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-f','--folder', help='Folder to be uploaded', required=True)
-parser.add_argument('-c','--container', help='Container to be recieve upload', required=True)
+#parser.add_argument('-a','--address', help='IP Address', required=True)
+#parser.add_argument('-d','--domain', help='FQDN', required=True)
 
 args = vars(parser.parse_args())
 
 cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 
 pyrax.set_credential_file(cred_file)
+
+dns = pyrax.cloud_dns
+address = '198.61.200.31'
+#address = '555.555.555.555'
+domain = 'another.mymuseisnan.com'
+
+def domain_exist(domain):
+  for d in dns.get_domain_iterator():
+    for r in dns.get_record_iterator(d):
+      if  r.name == domain:
+        return True
+      else:
+        return False
+
+try:
+  IP(address)
+except:
+  print "Yo, Dog how about a Valid IP"
