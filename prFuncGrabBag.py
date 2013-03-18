@@ -20,8 +20,9 @@ def get_img_id(self):
          if imgname == i.name] 
   return imgId[0]
 
-def get_container(name):
-  conId = [c.id for c in cf.get_all_containers()
-         if name == c.name] 
-  return conId[0]
+def container_exist(name):
+     if name in cf.list_containers():
+       return True
+     else:
+       return False
 
