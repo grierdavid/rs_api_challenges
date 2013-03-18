@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -30,36 +29,5 @@ parser.add_argument('-c','--container', help='Container to be recieve upload', r
 args = vars(parser.parse_args())
 
 cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
+
 pyrax.set_credential_file(cred_file)
-
-cf = pyrax.cloudfiles
-
-folder = args['folder']
-container = args['container']
-
-if not os.path.isdir(folder):
-  print "Invalid Directory or Path\n"
-  sys.exit(0)
-
-
-def container_exist(name):
-     if name in cf.list_containers():
-       return True 
-     else:
-       return False
-
-if container_exist(container):
-  print "Container pics exists"  
-else:
-    print "Creating container: %s" % container
-    cf.create_container(container)
-
-print "Uploading files from: %s to: %s\n" % (folder, container)  
-cf.sync_folder_to_container(folder, container)
-print "Upload complete"
-
-for obj in cf.get_container_objects(container):
-  print obj
-
-
-
