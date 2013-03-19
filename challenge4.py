@@ -42,28 +42,59 @@ try:
 except:
   print "Yo, Dog how about a Valid IP"
 
-if len(fqdn.split('.',)) > 3:
-  print "this program only supports third level domains"
+if len(fqdn.split('.')) > 2:
+  print "this program only supports second level domains"
   sys.exit(0)
 
-maindom = fqdn.partition('.')[2]
-print maindom
-
-try:
-  dom = dns.find(name=maindom)
-except:
-  print "domain not found %s" % maindom  
-
 a_rec = {"type": "A",
-        "name": "ano.mymuseusnan.com",
-        "data": "198.61.200.31",
+        "name": fqdn,
+        "data": address,
         "ttl": 6000}
 
-domid = dns.find(name='mymuseisnan.com').id
+domains = [ domain.name for domain in dns.zones() ]
+domain = "."
+for d in domains:
+  if address.endswith(d) and len(domain) < len(d):
+    domain = d
 
-print dom.id
+if domain != ".":
+  domain = dns.find(name=domain)
+else:
+  base_domain = ".".join(address.split('.')[:-2])
+  domain = dns.create(name=base_domain)
 
-recs = dom.add_record(a_rec)
-print recs
+domain.add_record(a_rec)
 
+if len(fqdn.split('.',)) >= 3:
+  maindom = fqdn.partition('.')[2]
+  sub = fqdn.partition('.')[1]
+  
+  print maindom
+  try:
+    domid = dns.find(name=maindom).id
+  except:
+    print "domain not found %s" % maindom  
+  for r in  dns.list_records(domid):
+    if r.name == fqdn:
+      exists = 'Yes' 
+      break
+    else:
+      exists = 'No'
+  if exists == 'Yes':
+    print "%s already exists" % fqdn   
+  else:
+    print "adding subdomain with record"
+    subdom = dns.create(name=maindom, subdomains=sub, records=a_rec)
+    #recs = subdom.add_record(a_rec)
+    print subdom
+
+else:
+  print "is second level domain adding record"
+  try:
+    dom = dns.find(name=fqdn)
+    recs = dom.add_record(a_rec)
+    print "adding record for %s" % fqdn
+    print recs
+  except:
+    print "domain not found %s" % fqdn  
 
