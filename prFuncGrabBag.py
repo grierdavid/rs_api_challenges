@@ -26,3 +26,19 @@ def container_exist(name):
      else:
        return False
 
+''
+protip: pyrax already does this down to 
+try: dns.find(name=domain)
+
+===
+
+for d in dns.get_domain_iterator():
+    for r in dns.get_record_iterator(d):
+      if r.name != domain:
+        addrec = 'Yes'
+      else:
+        addrec = 'No'
+        break
+===
+''
+

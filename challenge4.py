@@ -18,13 +18,14 @@
 import os
 import sys
 import pyrax
+import pyrax.exceptions as exc
 import argparse
 from IPy import IP
 
 parser = argparse.ArgumentParser()
 
-#parser.add_argument('-a','--address', help='IP Address', required=True)
-#parser.add_argument('-d','--domain', help='FQDN', required=True)
+parser.add_argument('-a','--address', help='IP Address', required=True)
+parser.add_argument('-d','--domain', help='FQDN', required=True)
 
 args = vars(parser.parse_args())
 
@@ -33,19 +34,35 @@ cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 pyrax.set_credential_file(cred_file)
 
 dns = pyrax.cloud_dns
-address = '198.61.200.31'
-#address = '555.555.555.555'
-domain = 'another.mymuseisnan.com'
-
-def domain_exist(domain):
-  for d in dns.get_domain_iterator():
-    for r in dns.get_record_iterator(d):
-      if  r.name == domain:
-        return True
-      else:
-        return False
+address = args['address']
+domain = args['domain']
 
 try:
   IP(address)
 except:
   print "Yo, Dog how about a Valid IP"
+
+if len(domain.split('.',)) > 3:
+  print "this program only supports third level domains"
+  sys.exit(0)
+
+dom = domain.partition('.')[2]
+print dom
+
+try:
+  dns.find(name=dom)
+except:
+  print "domain not found %s" % dom  
+
+''
+for r in dns.get_record_iterator(name=dom):
+      if r.name != domain:
+        addrec = 'Yes' 
+      else:
+        addrec = 'No'
+        break
+''
+a_rec = {"type": "A",
+        "name": domain_name,
+        "data": "1.2.3.4",
+        "ttl": 6000}
