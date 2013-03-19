@@ -35,34 +35,35 @@ pyrax.set_credential_file(cred_file)
 
 dns = pyrax.cloud_dns
 address = args['address']
-domain = args['domain']
+fqdn = args['domain']
 
 try:
   IP(address)
 except:
   print "Yo, Dog how about a Valid IP"
 
-if len(domain.split('.',)) > 3:
+if len(fqdn.split('.',)) > 3:
   print "this program only supports third level domains"
   sys.exit(0)
 
-dom = domain.partition('.')[2]
-print dom
+maindom = fqdn.partition('.')[2]
+print maindom
 
 try:
-  dns.find(name=dom)
+  dom = dns.find(name=maindom)
 except:
-  print "domain not found %s" % dom  
+  print "domain not found %s" % maindom  
 
-''
-for r in dns.get_record_iterator(name=dom):
-      if r.name != domain:
-        addrec = 'Yes' 
-      else:
-        addrec = 'No'
-        break
-''
 a_rec = {"type": "A",
-        "name": domain_name,
-        "data": "1.2.3.4",
+        "name": "ano.mymuseusnan.com",
+        "data": "198.61.200.31",
         "ttl": 6000}
+
+domid = dns.find(name='mymuseisnan.com').id
+
+print dom.id
+
+recs = dom.add_record(a_rec)
+print recs
+
+
