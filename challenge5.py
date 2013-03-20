@@ -22,17 +22,32 @@ and the database should have at least one user that can connect to it. Worth 1 P
 import os
 import sys
 import pyrax
+import time
 
+
+
+cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
+
+pyrax.set_credential_file(cred_file)
+
+inst_name = "challenge"
+flavor = "m1.tiny"
+db_name = "mydb"
+user_name = "dgrier"
+db_pass = "notagoodpass"
 
 cdb = pyrax.cloud_databases
 
-inst = cdb.create("first_instance", flavor="m1.tiny", volume=2)
+inst = cdb.create(inst_name, flavor=flavor, volume=2)
 print inst
 
-db = inst.create_database("db_name")
+while not "ACTIVE" in cdb.find(name=inst_name).status:
+  time.sleep(1)
+  
+db = inst.create_database(mydb)
 print "DB:", db
 
-user = inst.create_user(name="groucho", password="top secret", database_names=[db])
+user = inst.create_user(name=user_name, password=db_pass, database_names=[db])
 print "User:", user
 
 
