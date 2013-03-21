@@ -24,14 +24,14 @@ pyrax.set_credential_file(creds_file)
 cs = pyrax.cloudservers
 imgs = cs.images.list()
 
-servername = 'mysavvy'
-nextServer = 'mysavvy1'
-imgname = 'mysavvy-img8'
-size = 512
+servername = 'muse'
+nextServer = 'mues01'
+imgname = 'muse-03-19-13'
+size = 1024
 
-def get_flavor(self, size=512):
+def get_flavor(self, size=size):
   flavId = [flavor for flavor in cs.flavors.list()
-                  if flavor.ram == 512][0]
+                  if flavor.ram == size][0]
   return flavId 
 
 def get_server_id(name):
