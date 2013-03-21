@@ -26,6 +26,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-a','--address', help='IP Address', required=True)
 parser.add_argument('-d','--domain', help='FQDN', required=True)
+parser.add_argument('-c','--create', help="shall I create this if it doesn't exist [-c ya]", required=False)
 
 args = vars(parser.parse_args())
 
@@ -41,8 +42,9 @@ try:
   IP(address)
 except:
   print "Yo, Dog how about a Valid IP"
+  sys.exit(0)
 
-if len(fqdn.split('.')) > 2:
+if len(fqdn.split('.')) > 3:
   print "this program only supports second level domains"
   sys.exit(0)
 
@@ -51,50 +53,32 @@ a_rec = {"type": "A",
         "data": address,
         "ttl": 6000}
 
-domains = [ domain.name for domain in dns.zones() ]
-domain = "."
-for d in domains:
-  if address.endswith(d) and len(domain) < len(d):
-    domain = d
 
-if domain != ".":
-  domain = dns.find(name=domain)
+
+domains = [ domain.name for domain in dns.list() ]
+records = []
+
+base_domain = ".".join(fqdn.split('.')[-2:])
+
+print base_domain
+
+if base_domain in domains and base_domain == fqdn:
+   recs = dns.add_record(dns.find(name=base_domain).id, a_rec)
+   print "added records"
+   sys.exit(0)
+
+elif base_domain == fqdn and base_domain not in domains:
+   print "domain doesn't exist on account, create?"
+   sys.exit(0)
 else:
-  base_domain = ".".join(address.split('.')[:-2])
-  domain = dns.create(name=base_domain)
-
-domain.add_record(a_rec)
-
-if len(fqdn.split('.',)) >= 3:
-  maindom = fqdn.partition('.')[2]
-  sub = fqdn.partition('.')[1]
-  
-  print maindom
-  try:
-    domid = dns.find(name=maindom).id
-  except:
-    print "domain not found %s" % maindom  
-  for r in  dns.list_records(domid):
-    if r.name == fqdn:
-      exists = 'Yes' 
-      break
-    else:
-      exists = 'No'
-  if exists == 'Yes':
-    print "%s already exists" % fqdn   
-  else:
-    print "adding subdomain with record"
-    subdom = dns.create(name=maindom, subdomains=sub, records=a_rec)
-    #recs = subdom.add_record(a_rec)
-    print subdom
-
+  for d in domains:
+    for r in dns.list_records(dns.find(name=d).id):
+     records.append(r.name)
+if fqdn not in records:
+   print "create subdomain and add record"
 else:
-  print "is second level domain adding record"
-  try:
-    dom = dns.find(name=fqdn)
-    recs = dom.add_record(a_rec)
-    print "adding record for %s" % fqdn
-    print recs
-  except:
-    print "domain not found %s" % fqdn  
+   print "create subdomain"
+
+print records
+
 
