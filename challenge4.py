@@ -68,16 +68,28 @@ if base_domain in domains and base_domain == fqdn:
    sys.exit(0)
 
 elif base_domain == fqdn and base_domain not in domains:
-   print "domain doesn't exist on account, create?"
-   sys.exit(0)
+   if ars[create] == "ya":
+     domain = dns.create(name=fqdn)
+     recs = domain.add_records(a_rec)
+     print "created:"
+     print domain
+     print recs 
+     sys.exit(0)
+   else:
+     print "domain doesn't exist on account, create?\n add -c ya to the command line"
+     sys.exit(0)
 else:
   for d in domains:
     for r in dns.list_records(dns.find(name=d).id):
      records.append(r.name)
 if fqdn not in records:
-   print "create subdomain and add record"
+   print "creating subdomain and add record"
+   domain = dns.create(name=fqdn, a_rec)
+   #recs = domain.add_records(a_rec)
 else:
-   print "create subdomain"
+   print "adding records"
+     
+   
 
 print records
 
