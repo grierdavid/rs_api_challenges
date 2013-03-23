@@ -63,7 +63,7 @@ nnode = clb.Node(address=pvt_nets[1], port=80, condition="ENABLED")
 
 vip = clb.VirtualIP(type="PUBLIC")
 lb = clb.create(lb_name, port=80, protocol="HTTP", nodes=[node], virtual_ips=[vip])
-while lb.status not "ACTIVE":
+while not "ACTIVE" in lb.status:
   time.sleep(1)
 
 lb.add_nodes(nnode)
