@@ -21,22 +21,25 @@ Challenge 7: Write a script that will create 2 Cloud Servers and add them as nod
 import os
 import sys
 import pyrax
+import time
+import pdb
 
 cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 pyrax.set_credential_file(cred_file)
 
 cs = pyrax.cloudservers
-lb = pyrax.cloud_loadbalancers
+clb = pyrax.cloud_loadbalancers
 
+lb_name = 'challb'
 
 Cent = [img for img in cs.images.list()
                 if "CentOS 6.3" in img.name][0]
 flavor_512 = [flavor for flavor in cs.flavors.list()
                 if flavor.ram == 512][0]
 
-pvt_nets[]
+pvt_nets = []
 
-for i in range(1, 3):
+for i in range(3, 6):
     server_name='web' + str(i)
     server = cs.servers.create(server_name, Cent.id, flavor_512.id)
     print "Name:", server.name
@@ -46,12 +49,22 @@ for i in range(1, 3):
     print "Waiting for Network config.."
     while not cs.servers.get(server.id).networks:
       time.sleep(1)
-    pvt_net = cs.servers.get(cs.servers.find(name='mysavvy').id).networks['private'][0]
-    pvt_nets.append(str(pvt_net))
-    print "Networks:", cs.servers.get(server.id).networks['public']
+    pvt_net = cs.servers.get(cs.servers.find(name=server_name).id).networks['private'][0]
+    pub_net = cs.servers.get(cs.servers.find(name=server_name).id).networks['public'][0]
+#    pvt_net = server.networks['private'][0]
+#    pvt_nets.append(str(pvt_net))
+    pvt_nets.append(pvt_net) 
+    print "Public Networks: %s" % pub_net 
+    print "Private Networks: %s" % pvt_net
 
-node = clb.Node(address=pvt_add, port=80, condition="ENABLED")
+print pvt_nets
+node = clb.Node(address=pvt_nets[0], port=80, condition="ENABLED")
+nnode = clb.Node(address=pvt_nets[1], port=80, condition="ENABLED")
+
 vip = clb.VirtualIP(type="PUBLIC")
 lb = clb.create(lb_name, port=80, protocol="HTTP", nodes=[node], virtual_ips=[vip])
+while lb.status not "ACTIVE":
+  time.sleep(1)
 
+lb.add_nodes(nnode)
 
