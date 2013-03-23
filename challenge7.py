@@ -34,7 +34,9 @@ Cent = [img for img in cs.images.list()
 flavor_512 = [flavor for flavor in cs.flavors.list()
                 if flavor.ram == 512][0]
 
-for i in range(1, 3:
+pvt_nets[]
+
+for i in range(1, 3):
     server_name='web' + str(i)
     server = cs.servers.create(server_name, Cent.id, flavor_512.id)
     print "Name:", server.name
@@ -44,6 +46,8 @@ for i in range(1, 3:
     print "Waiting for Network config.."
     while not cs.servers.get(server.id).networks:
       time.sleep(1)
+    pvt_net = cs.servers.get(cs.servers.find(name='mysavvy').id).networks['private'][0]
+    pvt_nets.append(str(pvt_net))
     print "Networks:", cs.servers.get(server.id).networks['public']
 
 node = clb.Node(address=pvt_add, port=80, condition="ENABLED")
