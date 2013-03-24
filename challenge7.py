@@ -16,6 +16,7 @@
 #    under the License.
 '''
 Challenge 7: Write a script that will create 2 Cloud Servers and add them as nodes to a new Cloud Load Balancer.
+Limitation: server names need to be unique for some script operations
 '''
 
 import os
@@ -39,7 +40,7 @@ flavor_512 = [flavor for flavor in cs.flavors.list()
 
 pvt_nets = []
 
-for i in range(3, 6):
+for i in range(1, 3):
     server_name='web' + str(i)
     server = cs.servers.create(server_name, Cent.id, flavor_512.id)
     print "Name:", server.name
@@ -63,7 +64,8 @@ nnode = clb.Node(address=pvt_nets[1], port=80, condition="ENABLED")
 
 vip = clb.VirtualIP(type="PUBLIC")
 lb = clb.create(lb_name, port=80, protocol="HTTP", nodes=[node], virtual_ips=[vip])
-while not "ACTIVE" in lb.status:
+
+while not "ACTIVE" in clb.get(lb).status: 
   time.sleep(1)
 
 lb.add_nodes(nnode)
