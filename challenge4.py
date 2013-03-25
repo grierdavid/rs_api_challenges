@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-a','--address', help='IP Address', required=True)
 parser.add_argument('-d','--domain', help='FQDN', required=True)
 parser.add_argument('-c','--create', help="shall I create this if it doesn't exist [-c ya]", required=False)
+parser.add_argument('-e','--email', help="email if you are creating a domain", required=True)
 
 args = vars(parser.parse_args())
 
@@ -37,6 +38,8 @@ pyrax.set_credential_file(cred_file)
 dns = pyrax.cloud_dns
 address = args['address']
 fqdn = args['domain']
+create =  args['create']
+email = args['email']
 
 try:
   IP(address)
@@ -66,8 +69,8 @@ if base_domain in domains and base_domain == fqdn:
    sys.exit(0)
 
 elif base_domain == fqdn and base_domain not in domains:
-   if args[create]:
-     domain = dns.create(name=fqdn)
+   if create == "ya":
+     domain = dns.create(name=fqdn, emailAddress=email)
      recs = domain.add_records(a_rec)
      print "created:"
      print domain
