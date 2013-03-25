@@ -30,13 +30,17 @@ cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 
 pyrax.set_credential_file(cred_file)
 
-inst_name = "challenge"
-flavor = "m1.tiny"
+inst_name = "challenge2"
+flavor = int(512)
 db_name = "mydb"
 user_name = "dgrier"
 db_pass = "notagoodpass"
 
 cdb = pyrax.cloud_databases
+
+for flv in cdb.list_flavors():
+     if flv.ram == flavor:
+       flavor = flv.name 
 
 inst = cdb.create(inst_name, flavor=flavor, volume=2)
 print inst
@@ -44,8 +48,8 @@ print inst
 while not "ACTIVE" in cdb.find(name=inst_name).status:
   time.sleep(1)
   
-db = inst.create_database(mydb)
-print "DB:", db
+db = inst.create_database(db_name)
+print "DB:", db.name
 
 user = inst.create_user(name=user_name, password=db_pass, database_names=[db])
 print "User:", user
