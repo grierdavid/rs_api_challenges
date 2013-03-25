@@ -53,8 +53,6 @@ a_rec = {"type": "A",
         "data": address,
         "ttl": 6000}
 
-
-
 domains = [ domain.name for domain in dns.list() ]
 records = []
 
@@ -63,12 +61,12 @@ base_domain = ".".join(fqdn.split('.')[-2:])
 print base_domain
 
 if base_domain in domains and base_domain == fqdn:
-   recs = dns.add_record(dns.find(name=base_domain).id, a_rec)
+   recs = dns.add_record(dns.find(name=base_domain), a_rec)
    print "added records"
    sys.exit(0)
 
 elif base_domain == fqdn and base_domain not in domains:
-   if args[create] == "ya":
+   if args[create]:
      domain = dns.create(name=fqdn)
      recs = domain.add_records(a_rec)
      print "created:"
@@ -80,17 +78,15 @@ elif base_domain == fqdn and base_domain not in domains:
      sys.exit(0)
 else:
   for d in domains:
-    for r in dns.list_records(dns.find(name=d).id):
+    for r in dns.list_records(dns.find(name=d)):
      records.append(r.name)
 if fqdn not in records:
    print "creating subdomain and add record"
-   domain = dns.create(name=fqdn, a_rec)
-   #recs = domain.add_records(a_rec)
+   domain = dns.add_record(dns.find(name=base_domain), a_rec)
 else:
    print "adding records"
+   recs = dns.add_record(dns.find(name=base_domain), a_rec)
      
-   
-
 print records
 
 
