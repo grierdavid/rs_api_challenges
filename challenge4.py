@@ -68,7 +68,7 @@ if base_domain in domains and base_domain == fqdn:
    sys.exit(0)
 
 elif base_domain == fqdn and base_domain not in domains:
-   if ars[create] == "ya":
+   if args[create] == "ya":
      domain = dns.create(name=fqdn)
      recs = domain.add_records(a_rec)
      print "created:"
