@@ -20,19 +20,19 @@ import time
 import pyrax
 
 creds_file = os.path.expanduser("~/.rackspace_cloud_credentials")
-
 pyrax.set_credential_file(creds_file)
 cs = pyrax.cloudservers
-imgs = cs.images.list()
+imgname = 'CentOS 6.3'
+size = 512
 
 Cent = [img for img in cs.images.list()
-                if "CentOS 6.3" in img.name][0]
-flavor_512 = [flavor for flavor in cs.flavors.list()
-                if flavor.ram == 512][0]
+                if imgname in img.name][0]
+myflavor = [flavor for flavor in cs.flavors.list()
+                if flavor.ram == size][0]
 
 for i in range(1, 4):
     server_name='web' + str(i)
-    server = cs.servers.create(server_name, Cent.id, flavor_512.id)
+    server = cs.servers.create(server_name, Cent.id, myflavor.id)
     print "Name:", server.name
     print "ID:", server.id
     print "Status:", server.status
@@ -40,5 +40,5 @@ for i in range(1, 4):
     print "Waiting for Network config.."
     while not cs.servers.get(server.id).networks:
       time.sleep(1)
-    print "Networks:", cs.servers.get(server.id).networks['public']
+    print "Networks:", cs.servers.get(server).networks['public']
 
