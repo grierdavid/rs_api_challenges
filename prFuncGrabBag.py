@@ -1,15 +1,18 @@
 #!/usr/bin/env python
-''
+'''
 Some misc functions that might make it into a module
 
 
-''
+'''
 
 def get_flavor_id(self, size=512):
   flavId = [flavor for flavor in cs.flavors.list()
-                  if flavor.ram == 512][0]
+                  if flavor.ram == size][0]
   return flavId 
 
+'''
+better: cs.server.find(name=servername).id
+'''
 def get_server_id(name):
   sId = [s.id for s in cs.servers.list()
          if name == s.name]
@@ -26,9 +29,9 @@ def container_exist(name):
      else:
        return False
 
-''
+'''
 protip: pyrax already does this down to 
-try: dns.find(name=domain)
+try: dns.list_records(dns.get(dns.find(name=domain)))
 
 ===
 
@@ -40,5 +43,5 @@ for d in dns.get_domain_iterator():
         addrec = 'No'
         break
 ===
-''
+'''
 
