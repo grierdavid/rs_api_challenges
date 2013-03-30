@@ -28,24 +28,3 @@ import pyrax
 cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 pyrax.set_credential_file(cred_file)
 
-cf = pyrax.cloudfiles
-dns = pyrax.cloud_dns
-
-cname = 'static.mymuseisnan.com'
-base_domain = 'mymuseisnan.com'
-index_file = 'index.html'
-upload_dir = os.path.expanduser('~/upload/')
-cont_name = 'staticsite'
-
-container = cf.create_container(cont_name)
-container.make_public()
-cf.set_container_web_index_page(cont_name, index_file)
-cf.upload_file(cont_name, upload_dir + index_file)
-uri = container.cdn_uri.split('//')
-
-cname_rec = {"type": "CNAME",
-        "name": cname,
-        "data": uri[1],
-        "ttl": 6000}
-
-recs = dns.add_record(dns.find(name=base_domain), cname_rec)

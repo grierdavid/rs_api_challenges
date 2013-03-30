@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Copyright 2013 David Grier
 
 # All Rights Reserved.
 #
