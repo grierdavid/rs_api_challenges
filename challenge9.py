@@ -17,14 +17,89 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 '''
-Challenge 8: Write a script that will create a static webpage served out of Cloud Files. The script must create a new container, cdn enable it, enable it to serve an index file, create an index file object, upload the object to the container, and create a CNAME record pointing to the CDN URL of the container. Worth 3 Points
+Challenge 9: Write an application that when passed the arguments FQDN, image, and flavor it creates a server of the specified
+ image and flavor with the same name as the fqdn, and creates a DNS entry for the fqdn pointing to the server's public IP. 
+ Worth 2 Points
 
 '''
 
 import os
 import sys
 import pyrax
+import time
+import argparse 
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-d','--domain', help='FQDN', required=True)
+parser.add_argument('-i','--image', help='Image name to build From', required=True)
+parser.add_argument('-f','--flavor', help='Size of server', required=True)
+
+args = vars(parser.parse_args())
 
 cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
 pyrax.set_credential_file(cred_file)
 
+dns = pyrax.cloud_dns
+cs = pyrax.cloudservers
+
+fqdn = args['domain']
+image = args['image']
+size = args['flavor']
+
+myimage = [img for img in cs.images.list()
+                if image in img.name][0]
+
+myflavor = [flavor for flavor in cs.flavors.list()
+                if flavor.ram == int(size)][0]
+
+server = cs.servers.create(fqdn, myimage.id, myflavor.id)
+myserver = { "name": server.name,
+             "ID": server.id,
+             "adminpass": server.adminPass }
+
+print "Name:", myserver['name']
+print "ID:", myserver['ID']
+print "Status:", server.status
+print "Admin Password:", myserver['adminpass']
+print "Waiting for Network config.."
+#while not cs.servers.get(server).networks:
+while not "ACTIVE" in cs.servers.get(server).status:
+  time.sleep(1)
+
+print myserver['name']
+print myserver['ID']
+bldserver = cs.servers.find(id=myserver['ID'])
+
+print bldserver
+
+print "IP:", bldserver.accessIPv4
+print "name:", bldserver.name
+address = str(bldserver.accessIPv4)
+print "Networks:", address
+
+a_rec = {"type": "A",
+        "name": fqdn,
+        "data": address,
+        "ttl": 6000}
+print a_rec 
+sys.exit(0)
+
+if len(fqdn.split('.')) < 3:
+  print "This needs a hostname on top of a domain for FQDN"
+  sys.exit(0)
+else:
+  base_domain = ".".join(fqdn.split('.')[-2:])
+
+print base_domain
+
+domains = [ domain.name for domain in dns.list() ]
+
+if base_domain not in domains:
+  print "Base domain needs to be associated with your account" 
+  print domains
+  sys.exit(0)
+else:
+  recs = dns.add_record(dns.find(name=base_domain), a_rec)
+  print "Record added"
+  print recs
