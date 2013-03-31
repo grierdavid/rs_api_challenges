@@ -63,27 +63,19 @@ print "ID:", myserver['ID']
 print "Status:", server.status
 print "Admin Password:", myserver['adminpass']
 print "Waiting for Network config.."
-#while not cs.servers.get(server).networks:
-while not "ACTIVE" in cs.servers.get(server).status:
+while not cs.servers.get(server).networks:
   time.sleep(1)
 
-print myserver['name']
-print myserver['ID']
-bldserver = cs.servers.find(id=myserver['ID'])
+mypubipv4 = [ ip for ip in cs.servers.get(server).networks['public']
+                if len( ip.split(".") ) == 4 ]
 
-print bldserver
-
-print "IP:", bldserver.accessIPv4
-print "name:", bldserver.name
-address = str(bldserver.accessIPv4)
-print "Networks:", address
+print "IP:", str(mypubipv4[0])
 
 a_rec = {"type": "A",
         "name": fqdn,
-        "data": address,
+        "data": str(mypubipv4[0]),
         "ttl": 6000}
 print a_rec 
-sys.exit(0)
 
 if len(fqdn.split('.')) < 3:
   print "This needs a hostname on top of a domain for FQDN"
