@@ -53,6 +53,12 @@ myimage = [img for img in cs.images.list()
 myflavor = [flavor for flavor in cs.flavors.list()
                 if flavor.ram == int(size)][0]
 
+if len(fqdn.split('.')) < 3:
+  print "needs to be a FQDN"
+  sys.exit(0)
+else:
+  base_domain = ".".join(fqdn.split('.')[-2:])
+
 server = cs.servers.create(fqdn, myimage.id, myflavor.id)
 myserver = { "name": server.name,
              "ID": server.id,
@@ -76,14 +82,6 @@ a_rec = {"type": "A",
         "data": str(mypubipv4[0]),
         "ttl": 6000}
 print a_rec 
-
-if len(fqdn.split('.')) < 3:
-  print "This needs a hostname on top of a domain for FQDN"
-  sys.exit(0)
-else:
-  base_domain = ".".join(fqdn.split('.')[-2:])
-
-print base_domain
 
 domains = [ domain.name for domain in dns.list() ]
 
