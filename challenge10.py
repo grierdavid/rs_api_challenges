@@ -38,10 +38,27 @@ pyrax.set_credential_file(cred_file)
 
 cs = pyrax.cloudservers
 clb = pyrax.cloud_loadbalancers
+cf = pyrax.cloudfiles
+dns = pyrax.cloud_dns
 
-lb_name = 'challb'
 imgname = 'CentOS 6.3'
 size = 512
+
+#Needs to be fqdn and based on a domain associated with this account
+lb_name = 'challb.mymuseisnan.com'
+
+if len(lb_name.split('.')) < 3:
+  print "needs to be a FQDN"
+  sys.exit(0)
+else:
+  base_domain = ".".join(lb_name.split('.')[-2:])
+
+domains = [ domain.name for domain in dns.list() ]
+
+if base_domain not in domains:
+  print "Base domain needs to be associated with your account"
+  print domains
+  sys.exit(0)
 
 myimage = [img for img in cs.images.list()
                 if imgname in img.name][0]
@@ -51,12 +68,13 @@ myflavor = [flavor for flavor in cs.flavors.list()
 pvt_nets = []
 
 keyfile = os.path.expanduser('~/pubkey')
+keyfileobj = open(keyfile, 'r')
 
-files = {'/root/.ssh/authorized_keys': keyfile}
+files = {'/root/.ssh/authorized_keys': keyfileobj}
 
 for i in range(1, 3):
     server_name='web' + str(i)
-    server = cs.servers.create(server_name, myimage.id, myimage.id, files=files)
+    server = cs.servers.create(server_name, myimage.id, myflavor.id, files=files)
     print "Name:", server.name
     print "ID:", server.id
     print "Admin Password:", server.adminPass
@@ -78,6 +96,48 @@ lb = clb.create(lb_name, port=80, protocol="HTTP", nodes=[node], virtual_ips=[vi
 
 while not "ACTIVE" in clb.get(lb).status: 
   time.sleep(1)
-
 lb.add_nodes(nnode)
+while not "ACTIVE" in clb.get(lb).status:
+  time.sleep(1)
 
+error_page = lb.get_error_page()
+
+#- Write the error page html to a file in cloud files for backup.
+def container_exist(name):
+     if name in cf.list_containers():
+       return True
+     else:
+       return False
+
+error_html = str(error_page['errorpage']['content'])
+cust_error = error_html.replace('Service Unavailable', 'Opps, please try later')
+cust_error = cust_error.replace('The service is temporarily unavailable', 'Sorry, we will be back soon!')
+
+lb.set_error_page(cust_error)
+errorcont = 'custom_error_backup'
+
+errorpage = open('/tmp/error.html', 'w')
+errorfile = '/tmp/error.html'
+errorpage.write(cust_error)
+errorpage.close()
+
+if container_exist(errorcont):
+  print "Container for errorpage backup exists"
+else:
+  print "Creating container: %s" % errorcont
+  cf.create_container(errorcont)
+
+print "Backing up error page to cloudfiles"
+cf.upload_file(errorcont, errorfile)
+
+while not "ACTIVE" in clb.get(lb).status:
+  time.sleep(1)
+#- Create a DNS record based on a FQDN for the LB VIP.
+a_rec = {"type": "A",
+        "name": lb_name,
+        "data": vip,
+        "ttl": 6000}
+
+recs = dns.add_record(dns.find(name=base_domain), a_rec)
+print "Record added"
+print recs
