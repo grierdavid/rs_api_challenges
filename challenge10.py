@@ -82,7 +82,7 @@ for i in range(1, 3):
     while not cs.servers.get(server.id).networks:
       time.sleep(1)
     pvt_net = str(cs.servers.get(server.id).networks['private'][0])
-    pub_net = str(cs.servers.get(server.id).networks['private'][0])
+    pub_net = str(cs.servers.get(server.id).networks['public'][0])
     pvt_nets.append(pvt_net) 
     print "Public Networks: %s" % pub_net 
     print "Private Networks: %s" % pvt_net
@@ -132,10 +132,17 @@ cf.upload_file(errorcont, errorfile)
 
 while not "ACTIVE" in clb.get(lb).status:
   time.sleep(1)
+#get vip from lb
+for i in lb.virtual_ips:
+    if i.type == 'PUBLIC':
+      pub_vip = i.address
+    else:
+      print "couldn't get IP from vip"
+      sys.exit(0) 
 #- Create a DNS record based on a FQDN for the LB VIP.
 a_rec = {"type": "A",
         "name": lb_name,
-        "data": vip,
+        "data": pub_vip,
         "ttl": 6000}
 
 recs = dns.add_record(dns.find(name=base_domain), a_rec)
