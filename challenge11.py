@@ -123,8 +123,10 @@ for i in srv_ids:
                 verbose=True)
     for id in cbs_ids:
       vol = cbs.get(id)
+      print "attaching vol: %s to srv: %s" % ( vol, mysrv )
       vol.attach_to_instance(mysrv, mountpoint="/dev/xvdb")
       pyrax.utils.wait_until(vol, "status", "in-use", interval=3, attempts=0,
         verbose=True)
       print "Volume attachments:", vol.attachments
       cbs_ids.pop(0)
+      break
