@@ -16,14 +16,16 @@ Delete all CBS Volumes
 Worth 3 points
 '''
 
-cred_file = os.path.expanduser('~/.rackspace_cloud_credentials')
+cred_file = os.path.expanduser('~/.rackspace_deleteall_credentials')
 pyrax.set_credential_file(cred_file)
 
 clb = pyrax.cloud_loadbalancers
 cs = pyrax.cloudservers
 cbs = pyrax.cloud_blockstorage
-dns = pyrax.cloud_dns
 cnw = pyrax.cloud_networks
+cf = pyrax.cloudfiles
+cdb = pyrax.cloud_databases
+
 
 print "Delete cloud servers"
 for server in cs.servers.list():
@@ -50,4 +52,16 @@ print "Delete Cloud Network"
 for nw in cnw.list():
     cnw.delete(nw)
 
+print "delete containers"
+for cont in cf.list_containers():
+    for ob in cf.get_container_objects(cont):
+       cf.delete_object(cont, ob)
 
+for cont in cf.list_containers():
+    cf.delete_container(cont)
+
+print "delete databases"
+for db in cdb.list():
+    cdb.delete(db)
+
+ 
