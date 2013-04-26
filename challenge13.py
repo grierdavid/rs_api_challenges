@@ -31,6 +31,12 @@ print "Delete cloud servers"
 for server in cs.servers.list():
     cs.servers.delete(server.id)
 
+print "Delete server images"
+all_images = cs.images.list()
+images = [img for img in all_images if hasattr(img, "server")]
+for image in images:
+    cs.images.delete(image)
+
 print "Delete Load Balancers"
 for lb in clb.list():
     clb.delete(lb)
